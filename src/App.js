@@ -1,86 +1,174 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import SignIn from './components/SignIn';
+import Paperbase from './components/Paperbase';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Container, CssBaseline } from '@mui/material';
 
-const API_URL = 'http://localhost:3001/sessions';
+let theme = createTheme({
+  palette: {
+    primary: {
+      light: '#63ccff',
+      main: '#009be5',
+      dark: '#006db3',
+    },
+  },
+  typography: {
+    h5: {
+      fontWeight: 500,
+      fontSize: 26,
+      letterSpacing: 0.5,
+    },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+  components: {
+    MuiTab: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
+  },
+  mixins: {
+    toolbar: {
+      minHeight: 48,
+    },
+  },
+});
+
+theme = {
+  ...theme,
+  components: {
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#081627',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+        contained: {
+          boxShadow: 'none',
+          '&:active': {
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          marginLeft: theme.spacing(1),
+        },
+        indicator: {
+          height: 3,
+          borderTopLeftRadius: 3,
+          borderTopRightRadius: 3,
+          backgroundColor: theme.palette.common.white,
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          margin: '0 16px',
+          minWidth: 0,
+          padding: 0,
+          [theme.breakpoints.up('md')]: {
+            padding: 0,
+            minWidth: 0,
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          padding: theme.spacing(1),
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          borderRadius: 4,
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgb(255,255,255,0.15)',
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected': {
+            color: '#4fc3f7',
+          },
+        },
+      },
+    },
+    MuiListItemText: {
+      styleOverrides: {
+        primary: {
+          fontSize: 14,
+          fontWeight: theme.typography.fontWeightMedium,
+        },
+      },
+    },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          color: 'inherit',
+          minWidth: 'auto',
+          marginRight: theme.spacing(2),
+          '& svg': {
+            fontSize: 20,
+          },
+        },
+      },
+    },
+    MuiAvatar: {
+      styleOverrides: {
+        root: {
+          width: 32,
+          height: 32,
+        },
+      },
+    },
+  },
+};
+
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" />;
+}
 
 function App() {
-  const [items, setItems] = useState([]);
-  const [name, setName] = useState('');
-  const [editing, setEditing] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null);
-
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const fetchItems = async () => {
-    try {
-      const response = await axios.get(API_URL);
-      setItems(response.data);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-    }
-  };
-
-  const addItem = async () => {
-    try {
-      await axios.post(API_URL, { id: Date.now().toString(), name });
-      setName('');
-      fetchItems();
-    } catch (error) {
-      console.error('Error adding item:', error);
-    }
-  };
-
-  const updateItem = async () => {
-    try {
-      await axios.put(`${API_URL}/${currentItem.id}`, { name });
-      setName('');
-      setEditing(false);
-      setCurrentItem(null);
-      fetchItems();
-    } catch (error) {
-      console.error('Error updating item:', error);
-    }
-  };
-
-  const deleteItem = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-      fetchItems();
-    } catch (error) {
-      console.error('Error deleting item:', error);
-    }
-  };
-
-  const startEditing = (item) => {
-    setEditing(true);
-    setCurrentItem(item);
-    setName(item.name);
-  };
-
   return (
-    <div className="App">
-      <h1>Sessions</h1>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Item name"
-      />
-      <button onClick={editing ? updateItem : addItem}>
-        {editing ? 'Update' : 'Add'} Item
-      </button>
-      <ul>
-        {items.map((item) => (
-          <li key={item.id}>
-            {item.name}
-            <button onClick={() => startEditing(item)}>Edit</button>
-            <button onClick={() => deleteItem(item.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <Router>
+            <Routes>
+              <Route path="/login" element={<SignIn />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Paperbase theme={theme} /></ProtectedRoute>} />
+            </Routes>
+          </Router>
+        </Container>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 
