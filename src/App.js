@@ -5,6 +5,7 @@ import SignIn from './components/SignIn';
 import Paperbase from './components/Paperbase';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Container, CssBaseline } from '@mui/material';
+import ProtectedRoute from './components/ProtectedRoute';
 
 let theme = createTheme({
   palette: {
@@ -149,11 +150,6 @@ theme = {
   },
 };
 
-function ProtectedRoute({ children }) {
-  const { user } = useAuth();
-  return user ? children : <Navigate to="/login" />;
-}
-
 function App() {
   return (
     <AuthProvider>
@@ -163,7 +159,8 @@ function App() {
           <Router>
             <Routes>
               <Route path="/login" element={<SignIn />} />
-              <Route path="/dashboard" element={<ProtectedRoute><Paperbase theme={theme} /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute element={<Paperbase theme={theme} />} />} />
+              <Route path="/" element={<Navigate to="/login" />} />
             </Routes>
           </Router>
         </Container>
