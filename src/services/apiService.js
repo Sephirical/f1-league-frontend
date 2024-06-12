@@ -14,14 +14,31 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-export const login = async (email, password) => {
-  const response = await apiClient.post('/users/login', { email, password });
-  return response.data;
+export const login = async (username, password) => {
+  try {
+    const response = await apiClient.post('/users/login', { username, password });
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-export const getProtectedData = async () => {
-  const response = await apiClient.get('/api/protected');
-  return response.data;
+export const getSessions = async () => {
+  try {
+    const response = await apiClient.get('/sessions');
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
 };
+
+export const setSessionName = async (sessionId, name) => {
+  try {
+    const response = await apiClient.put(`/sessions/${sessionId}`, { name });
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 // Add other API methods as needed

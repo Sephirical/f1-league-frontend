@@ -1,4 +1,4 @@
-export default Tracks = [
+export const Tracks = [
   { "ID": 0, "Track": "Melbourne" },
   { "ID": 1, "Track": "Paul Ricard" },
   { "ID": 2, "Track": "Shanghai" },

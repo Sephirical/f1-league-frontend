@@ -1,0 +1,21 @@
+export const Sessiontypes = [
+  { "ID": 0, "Name": "Unknown"},
+  { "ID": 1, "Name": "Practice 1"},
+  { "ID": 2, "Name": "Practice 2"},
+  { "ID": 3, "Name": "Practice 3"},
+  { "ID": 4, "Name": "Short Practice"},
+  { "ID": 5, "Name": "Qualifying 1"},
+  { "ID": 6, "Name": "Qualifying 2"},
+  { "ID": 7, "Name": "Qualifying 3"},
+  { "ID": 8, "Name": "Short Qualifying"},
+  { "ID": 9, "Name": "One-Shot Qualifying"},
+  { "ID": 10, "Name": "Sprint Shootout 1"},
+  { "ID": 11, "Name": "Sprint Shootout 2"},
+  { "ID": 12, "Name": "Sprint Shootout 3"},
+  { "ID": 13, "Name": "Short Sprint Shootout"},
+  { "ID": 14, "Name": "One-Shot Sprint Shootout"},
+  { "ID": 15, "Name": "Race"},
+  { "ID": 16, "Name": "Race 2"},
+  { "ID": 17, "Name": "Race 3"},
+  { "ID": 18, "Name": "Time Trial"}
+]
