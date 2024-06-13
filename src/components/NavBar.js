@@ -13,6 +13,7 @@ const NavBar = () => {
           <Button color="inherit" component={Link} to="/dashboard/sessions"><Typography variant="body2"><strong>Sessions</strong></Typography></Button>
           <Button color="inherit" component={Link} to="/dashboard/oor-sessions"><Typography variant="body2"><strong>OOR Sessions</strong></Typography></Button>
           <Button color="inherit" component={Link} to="/dashboard/live-telemetry"><Typography variant="body2"><strong>Live Telemetry</strong></Typography></Button>
+          <Button color="inherit" component={Link} to="/dashboard/tt-classification"><Typography variant="body2"><strong>TT Classification</strong></Typography></Button>
         </Box>
       </Toolbar>
     </AppBar>

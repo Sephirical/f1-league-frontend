@@ -11,7 +11,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 
-const Sessions = ({ setCurrentSession }) => {
+const TTClassifications = () => {
   const [sessions, setSessions] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -49,7 +49,6 @@ const Sessions = ({ setCurrentSession }) => {
 
   const handleView = (row) => {
     console.log('View:', row);
-    setCurrentSession(row);
   }
 
   const handleDelete = () => {
@@ -136,4 +135,4 @@ const Sessions = ({ setCurrentSession }) => {
   );
 };
 
-export default Sessions;
+export default TTClassifications;
