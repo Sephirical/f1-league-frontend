@@ -7,9 +7,10 @@ import NavBar from './components/NavBar';
 import Sessions from './components/Sessions';
 import OORSessions from './components/OORSessions';
 import LiveTelemetry from './components/LiveTelemetry';
+import TTClassifications from './components/TTClassifications';
 
 const App = () => {
-  const [currentSession, setCurrenSession] = useState(null);
+  const [currentSession, setCurrentSession] = useState(null);
   return (
     <Router>
       <Routes>
@@ -25,9 +26,10 @@ const App = () => {
             } />
           }
         >
-          <Route path="sessions" element={<Sessions setCurrenSession={setCurrenSession} />} />
+          <Route path="sessions" element={<Sessions setCurrentSession={setCurrentSession} />} />
           <Route path="oor-sessions" element={<OORSessions />} />
           <Route path="live-telemetry" element={<LiveTelemetry />} />
+          <Route path="tt-classification" element={<TTClassifications />} />
         </Route>
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>

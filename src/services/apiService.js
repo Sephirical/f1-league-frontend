@@ -41,4 +41,22 @@ export const setSessionName = async (sessionId, name) => {
   }
 }
 
+export const createTTClassification = async (name, track) => {
+  try {
+    const response = await apiClient.post('/tt-classifications', { name, trackID: track });
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export const getTTClassifications = async () => {
+  try {
+    const response = await apiClient.get('/tt-classifications');
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 // Add other API methods as needed

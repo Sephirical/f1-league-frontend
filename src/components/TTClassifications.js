@@ -1,80 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Alert, Container, Snackbar, Typography } from '@mui/material';
-import { getSessions, setSessionName } from '../services/apiService';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { Tracks } from '../constants/tracks';
-import { Gamemodes } from '../constants/gamemodes';
-import { Sessiontypes } from '../constants/sessiontypes';
-import { Rulesets } from '../constants/rulesets';
-import { Formulas } from '../constants/formulas';
+import { createTTClassification, getTTClassifications } from '../services/apiService';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import { SelectContext } from '../contexts/selectContext';
 
 const TTClassifications = () => {
-  const [sessions, setSessions] = useState([]);
+  const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [snackOpen, setSnackOpen] = useState(false);
-  const [snackMessage, setSnackMessage] = useState("");
-  const [snackSeverity, setSnackSeverity] = useState("success");
-
-  const fetchSessions = async () => setSessions(await getSessions());
-
-  const processRowUpdate = async (newRow, oldRow) => {
-    const updatedRow = { ...oldRow, ...newRow };
-    setSessions((prevSessions) =>
-      prevSessions.map((row) => (row.sessionId === updatedRow.sessionId ? updatedRow : row))
-    );
-
-    // Make API call to save changes
-    try {
-      setSessionName(updatedRow.sessionId, updatedRow.name);
-      setSnackMessage(`Successfully updated the name for session ${updatedRow.sessionId}.`);
-      setSnackSeverity('success');
-      setSnackOpen(true);
-    } catch (error) {
-      setSnackMessage(error);
-      setSnackSeverity('error');
-      setSnackOpen(true);
-      console.error('Error saving data', error);
-    }
-
-    return updatedRow;
-  };
-
-  const handleProcessRowUpdateError = (error) => {
-    console.error('Error processing row update:', error);
-  };
-
-  const handleView = (row) => {
-    console.log('View:', row);
-  }
-
-  const handleDelete = () => {
-    console.log('Delete:', selectedRow?.sessionId);
-  }
-
-  const handleDeleteClick = (row) => {
-    setSelectedRow(row);
-    setOpen(true);
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackOpen(false);
-    setSnackMessage("");
-  }
+  const [newClassification, setNewClassification] = useState({ name: '', track: '' });
+  const { selected, setSelected } = useContext(SelectContext);
 
   useEffect(() => {
-    // Replace with your data fetching logic
-    fetchSessions();
+    getClassifications();
   }, []);
+
+  const getClassifications = async () => {
+    const response = await getTTClassifications();
+    setRows(response.map((r, i) => {
+      return {
+        ...r,
+        id: i
+      }
+    }))
+  };
+
+  const getTrackName = (params) => {
+    const track = Tracks.find(t => t.ID === params)?.Track
+    return track;
+  }
 
   const columns = [
     {
       field: 'actions',
       headerName: 'Actions',
-      flex: 2,
+      flex: 1,
       sortable: false,
       renderCell: (params) => (
         <>
@@ -84,54 +47,114 @@ const TTClassifications = () => {
           >
             <VisibilityIcon />
           </IconButton>
-          <IconButton
-            color="primary"
-            onClick={() => handleDeleteClick(params.row)}
-          >
-            <DeleteIcon />
-          </IconButton>
         </>
       )
     },
-    { field: 'sessionId', headerName: 'Session ID', flex: 4 },
-    { field: 'name', headerName: 'Name', flex: 4, editable: true },
-    { field: 'trackId', headerName: 'Track', flex: 2, valueGetter: (value) => Tracks.find(t => t.ID === value)?.Track || ""},
-    { field: 'gameMode', headerName: 'Game Mode', flex: 2, valueGetter: (value) => Gamemodes.find(g => g.ID === value)?.Name || "" },
-    { field: 'sessionType', headerName: 'Session Type', flex: 2, valueGetter: (value) => Sessiontypes.find(s => s.ID === value)?.Name || "" },
-    { field: 'ruleSet', headerName: 'Rule Set', flex: 2, valueGetter: (value) => Rulesets.find(r => r.ID === value)?.Name || "" },
-    { field: 'formula', headerName: 'Formula', flex: 2, valueGetter: (value) => Formulas.find(f => f.ID === value)?.Name || "" },
-    { field: 'isOor', headerName: 'Is OOR?', flex: 2, type: 'boolean' }
+    { field: 'id', headerName: 'ID', flex: 1 },
+    { field: 'className', headerName: 'Name', flex: 4 },
+    { field: 'track', headerName: 'Track', flex: 2, valueGetter: getTrackName },
   ];
 
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setNewClassification({ name: '', track: '' });
+  };
+
+  const handleSave = async () => {
+    const response = await createTTClassification(newClassification.name, Tracks.find(t => t.Track === newClassification.track)?.ID);
+    if (response) {
+      const newId = rows.length ? Math.max(...rows.map(row => row.id)) + 1 : 1;
+      setRows([...rows, { id: newId, ...newClassification }]);
+    }
+    handleClose();
+  };
+
+  const handleView = (row) => {
+    setSelected({
+      ...selected,
+      ttClassification: row.name
+    })
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log(e.target);
+    setNewClassification(prevState => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
   return (
-    <Container>
-      <Snackbar 
-        open={snackOpen}
-        autoHideDuration={5000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    <div style={{ height: 400, width: '100%' }}>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<AddIcon />}
+        onClick={handleClickOpen}
+        style={{ marginBottom: 16 }}
       >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackSeverity}
-          variant='filled'
-        >
-          {snackMessage}
-        </Alert>
-      </Snackbar>
-      <Typography variant="h4" component="h2" gutterBottom>Sessions</Typography>
-      <div style={{ height: '100%', width: '90vw' }}>
-        <DataGrid 
-          rows={sessions} 
-          columns={columns} 
-          pageSize={100} 
-          getRowId={(row) => row.sessionId}
-          processRowUpdate={processRowUpdate}
-          disableRowSelectionOnClick
-          onProcessRowUpdateError={handleProcessRowUpdateError}
-        />
-      </div>
-    </Container>
+        Create New TT Classification
+      </Button>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={5}
+        rowsPerPageOptions={[5]}
+        checkboxSelection
+        disableSelectionOnClick
+        initialState={{
+          columns: {
+            columnVisibilityModel: {
+              id: false
+            },
+          },
+        }}
+      />
+      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Create New TT Classification</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            name="name"
+            label="Name"
+            type="text"
+            fullWidth
+            value={newClassification.name}
+            onChange={handleChange}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="track-select-label">Track</InputLabel>
+            <Select
+              labelId="track-select-label"
+              name="track"
+              value={newClassification.track}
+              onChange={handleChange}
+              fullWidth
+            >
+              {Tracks.map((track) => (
+                <MenuItem key={track.ID} value={track.Track}>
+                  {track.Track}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 };
 
